@@ -6,7 +6,6 @@ const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
-const StringReplacePlugin = require('string-replace-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const TerserJSPlugin = require('terser-webpack-plugin')
 
@@ -47,10 +46,9 @@ const config = {
     }
   },
   output: {
-    filename: 'js/[name].bundle.js',
+    filename: 'js/bundle.js',
     path: resolve(__dirname, 'dist/assets'),
-    publicPath: '/',
-    chunkFilename: 'js/[name].js?id=[chunkhash]'
+    publicPath: '/'
   },
   mode: 'production',
   context: resolve(__dirname, 'client'),
@@ -75,27 +73,7 @@ const config = {
         exclude: /node_modules/
       },
       {
-        test: /\.css$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              publicPath: '../'
-            }
-          },
-          { loader: 'css-loader', options: { sourceMap: true } },
-          {
-            loader: 'postcss-loader'
-          }
-        ]
-      },
-      {
-        test: /\.txt$/i,
-        use: 'raw-loader'
-      },
-      {
-        test: /\.scss$/,
-        exclude: /node_modules/,
+        test: /\.(css|scss)$/i,
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
@@ -113,7 +91,10 @@ const config = {
           }
         ]
       },
-
+      {
+        test: /\.txt$/i,
+        use: 'raw-loader'
+      },
       {
         test: /\.(png|jpg|gif|webp)$/,
         use: [
@@ -167,9 +148,13 @@ const config = {
       }
     ]
   },
-  plugins: [
-    new StringReplacePlugin(),
 
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].css',
+      chunkFilename: 'css/[id].css',
+      ignoreOrder: false
+    }),
     new CopyWebpackPlugin(
       {
         patterns: [
@@ -177,6 +162,7 @@ const config = {
           { from: 'assets/images', to: 'images' },
           { from: 'assets/fonts', to: 'fonts' },
           { from: 'assets/manifest.json', to: 'manifest.json' },
+          { from: 'index.html', to: 'index.html' },
 
           { from: 'vendors', to: 'vendors' },
           {
@@ -190,11 +176,6 @@ const config = {
       },
       { parallel: 100 }
     ),
-    new MiniCssExtractPlugin({
-      filename: 'css/[name].css',
-      chunkFilename: 'css/[id].css',
-      ignoreOrder: false
-    }),
     new webpack.DefinePlugin(
       Object.keys(process.env).reduce(
         (res, key) => ({ ...res, [key]: JSON.stringify(process.env[key]) }),

@@ -76,7 +76,8 @@ const PrivateRouteConnected = connect(mapStateToProps, mapDispatchToProps)(Priva
 const mapDispatchToPropsStartup = (dispatch) => bindActionCreators({}, dispatch)
 
 const StartupConnected = withRouter(connect(() => ({}), mapDispatchToPropsStartup)(Startup))
-export default (props) => {
+
+const RootComponent = (props) => {
   return (
     <Provider store={store}>
       <ConnectedRouter history={history} location={props.location} context={props.context}>
@@ -92,3 +93,5 @@ export default (props) => {
     </Provider>
   )
 }
+
+export default RootComponent
